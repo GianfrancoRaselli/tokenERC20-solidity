@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "./SafeMath.sol";
 
+
 // interface de nuestro token ERC20
 interface IERC20 {
 
@@ -33,33 +34,39 @@ interface IERC20 {
 
 }
 
+
 // implementacion de las funciones del token ERC20
 contract ERC20Basic is IERC20 {
 
   using SafeMath for uint256;
 
 
+  address public creator = msg.sender;
+
   string public constant name = "ERC20Token";
   string public constant symbol = "ERC20";
   uint8 public constant decimals = 18;
 
-  uint256 total_supply;
+  uint256 public override totalSupply;
   mapping(address => uint) balances;
   mapping(address => mapping(address => uint)) allowed;
 
 
+  modifier onlyCreator() {
+    // requiere que la direccion del ejecutor de la funcion sea igual al creaor del token
+    require(creator == msg.sender, 'You can not access to this function');
+    _;
+  }
+
+
   constructor(uint256 _initialSupply) {
-    total_supply = _initialSupply;
-    balances[msg.sender] = total_supply;
+    totalSupply = _initialSupply;
+    balances[msg.sender] = totalSupply;
   }
 
 
-  function totalSupply() public override view returns (uint256) {
-    return total_supply;
-  }
-
-  function increaseTotalSupply(uint newTokensAmount) public {
-    total_supply += newTokensAmount;
+  function increaseTotalSupply(uint newTokensAmount) public onlyCreator() {
+    totalSupply += newTokensAmount;
     balances[msg.sender] += newTokensAmount;
   }
 
